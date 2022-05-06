@@ -1,0 +1,7 @@
+DEVICE_NAME="Google Pixel 3a"
+LATITUDE="31.817857"
+LONGITUDE="117.127752"
+SAVE_DIR="${HOME}/health-code"
+AKM_SAMPLE="${HOME}/health-code-sample/akm.png"
+XCK_SAMPLE="${HOME}/health-code-sample/xck.png"
+GENYMOTION_DIR="/opt/genymobile/genymotion"
