@@ -53,5 +53,5 @@ sleep(1)
 confirm_area.click()
 sleep(2)
 
-assert len(d.xpath('%的动态行程卡').all())
+assert len(d.xpath('%的动态行程卡').all()) == 1
 d.screenshot(args.xck_path)
