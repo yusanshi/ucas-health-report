@@ -2,7 +2,7 @@ import uiautomator2 as u2
 import argparse
 
 from time import sleep
-from config import PHONE_NUMBER
+from config import PHONE_NUMBER, WST_PASSWORD
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--akm_path', type=str, default='akm.png')
@@ -13,9 +13,21 @@ d = u2.connect()
 
 d.app_start('com.iflytek.oshall.ahzwfw')
 sleep(5)
+if d(text='打开系统定位服务').count > 0:
+    assert d(text='取消').count == 1
+    d(text='取消').click()
+    sleep(2)
 assert d(text='安康码').count == 1
 d(text='安康码').click()
 sleep(5)
+if d(text='请输入密码').count > 0:
+    # Need to relogin
+    d(text='请输入密码').click()
+    d.send_keys(WST_PASSWORD)
+    d.xpath('@com.iflytek.oshall.ahzwfw:id/login_btn').click()
+    sleep(3)
+    d(text='安康码').click()
+    sleep(5)
 if d(text='打开系统定位服务').count > 0:
     assert d(text='取消').count == 1
     d(text='取消').click()
@@ -26,6 +38,8 @@ d.screenshot(args.akm_path)
 d.open_url("https://xc.caict.ac.cn/")
 sleep(5)
 
+# Tricky: the first call to `d.xpath("//android.widget.EditText").all()` often failed,
+# so we retry it several times
 for i in range(5):
     if len(d.xpath("//android.widget.EditText").all()) == 3:
         break
