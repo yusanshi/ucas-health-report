@@ -17,7 +17,7 @@
 
 ## 开始
 
-1. 安装 Genymotion，安装一个合适的安卓虚拟机（本人用的是 Android 9.0），虚拟中安装皖事通 APP 和一个合适的浏览器，登录好皖事通，确保可以正常获得京康码，在浏览器中手动获取行程码，然后将这两个码存起来作为 `AKM_SAMPLE` 和 `XCK_SAMPLE`（见 `config.sh`）；
+1. 安装 Genymotion，安装一个合适的安卓虚拟机（本人用的是 Android 9.0），虚拟机中安装京事通 APP 和一个合适的浏览器，登录好京事通，确保可以正常获得京康码，在浏览器中手动获取行程码，然后将这两个码存起来作为 `AKM_SAMPLE` 和 `XCK_SAMPLE`（见 `config.sh`）；
 2. 重命名 `config.sample.py` 为 `config.py`，修改 `config.py` 和 `config.sh`；
 3. 按 [~~自动打卡工具~~ 开学报到提醒小工具](https://github.com/yusanshi/ucas-checkin) 配置 selenium 和 OCR；
 4. 安装 uiautomator2：`pip install uiautomator2`；
