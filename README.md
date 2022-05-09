@@ -29,3 +29,5 @@
 
 - 如何在虚拟机中运行通信行程卡 APP？目前会白屏；
 - 如何在安卓 12 物理机中运行通信行程卡 APP？本人还有一台备用安卓物理机，使用的是类原生系统（Android 12），但是用它打开通信行程卡 APP 会白屏，如果不白屏的话，就可以结合手机的关机闹钟功能实现全自动的每日定时开机、上传、申请、关机任务。
+
+> Update (2022.5.10): 本人将物理机降级到了安卓 11，可以正常使用通信行程卡 APP，于是得以实现免验证码全自动操作，见 [branch `physical-android`](https://github.com/yusanshi/ucas-health-report/tree/physical-android)。
