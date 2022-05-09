@@ -1,10 +1,12 @@
 # 国科大健康码上传和报备小工具
 
-用于国科大学生（半）自动化上传健康码、申请出校报备。
+用于国科大学生自动化上传健康码、申请出校报备。
 
 ## 简介
 
-本项目采用了安卓模拟器（用了 Genymotion）的方案。由于 Genymotion 的 headless 不太好做，且每次申请行程卡的时候需要手动填入验证码，因此本项目的使用场景是需要出校的当天在本机手动执行脚本，并在脚本提示下手动输入验证码使用，而不是用于服务器端每日全自动运行。
+本项目利用 root 后的安卓物理机实现每日自动化上传健康码、申请出校报备。机器推荐安装类原生系统（本人用的是 [crDroid](https://crdroid.net/)，它包含安卓 11 和 12 的版本，本人选择的是 11），最好能支持关机闹钟。
+
+另有使用安卓虚拟机的方案，但是该方法无法正常使用通信行程卡 APP，所以每次需要手动输入验证码，见 [branch `virtual-android`](https://github.com/yusanshi/ucas-health-report/tree/virtual-android)。
 
 由于国科大提交出校报备时还要求当天已经健康打卡，所以请配合 [~~自动打卡工具~~ 开学报到提醒小工具](https://github.com/yusanshi/ucas-checkin) 使用。
 
@@ -17,17 +19,5 @@
 
 ## 开始
 
-1. 安装 Genymotion，安装一个合适的安卓虚拟机（本人用的是 Android 9.0），虚拟机中安装京事通 APP 和一个合适的浏览器，登录好京事通，确保可以正常获得京康码，在浏览器中手动获取行程码，然后将这两个码存起来作为 `AKM_SAMPLE` 和 `XCK_SAMPLE`（见 `config.sh`）；
-2. 重命名 `config.sample.py` 为 `config.py`，修改 `config.py` 和 `config.sh`；
-3. 按 [~~自动打卡工具~~ 开学报到提醒小工具](https://github.com/yusanshi/ucas-checkin) 配置 selenium 和 OCR；
-4. 安装 uiautomator2：`pip install uiautomator2`；
-5. 运行：`./main.sh`，但是能直接顺利走完的概率不大 :) 所以建议一步一步地调试运行 `main.sh` 和各个 Python 文件（在逐步调试的时候你可以顺便改改 `upload_and_apply.py` 中的出校目的地、出校原因）。
+TBD
 
-## 其他
-
-本项目申请行程卡的时候由于用的是网页端所以需要手动填入验证码，如果可以正常使用通信行程卡 APP，那么就可以省略输入验证码的步骤，但在这个尝试中本人遇到了以下问题未能解决，如果有解决办法，欢迎 q 我，不胜感激。
-
-- 如何在虚拟机中运行通信行程卡 APP？目前会白屏；
-- 如何在安卓 12 物理机中运行通信行程卡 APP？本人还有一台备用安卓物理机，使用的是类原生系统（Android 12），但是用它打开通信行程卡 APP 会白屏，如果不白屏的话，就可以结合手机的关机闹钟功能实现全自动的每日定时开机、上传、申请、关机任务。
-
-> Update (2022.5.10): 本人将物理机降级到了安卓 11，可以正常使用通信行程卡 APP，于是得以实现免验证码全自动操作，见 [branch `physical-android`](https://github.com/yusanshi/ucas-health-report/tree/physical-android)。
