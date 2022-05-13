@@ -18,22 +18,19 @@ parser.add_argument('--health_code_save_dir',
                     type=str,
                     default=str(Path.home() / "health-code"),
                     help="保存健康码图片的位置")
-parser.add_argument('--akm_sample_path',
+parser.add_argument('--health_code_sample_dir',
                     type=str,
-                    default=str(Path.home() / "health-code-sample" /
-                                "akm.png"),
-                    help="示例健康码图片，用于计算相似度")
-parser.add_argument('--xck_sample_path',
-                    type=str,
-                    default=str(Path.home() / "health-code-sample" /
-                                "xck.png"),
-                    help="示例健康码图片，用于计算相似度")
+                    default=str(Path.home() / "health-code-sample"),
+                    help="示例健康码图片位置，用于计算相似度")
 parser.add_argument('--similiarity_threshold', type=float, default=0.9)
 args = parser.parse_args()
 
 Path(args.health_code_save_dir).mkdir(parents=True, exist_ok=True)
 akm_path = str(Path(args.health_code_save_dir) / f"{date.today()}-akm.png")
 xck_path = str(Path(args.health_code_save_dir) / f"{date.today()}-xck.png")
+hsm_path = str(Path(args.health_code_save_dir) / f"{date.today()}-hsm.png")
+
+upload_hsm = date.today().weekday() == 5  # Saturday
 
 
 def get_image_similiarity(first_image_path, second_image_path):
@@ -91,11 +88,19 @@ for _ in range(10):
         continue
     if d(text='切换国康码').exists:
         d.screenshot(akm_path)
+        check_image_similarity(
+            akm_path, str(Path(args.health_code_sample_dir) / "akm.png"))
+        if upload_hsm:
+            d(text='核酸检测报告').click()
+            sleep(5)
+            d(text='阴性').click()
+            sleep(5)
+            d.screenshot(hsm_path)
+            check_image_similarity(
+                hsm_path, str(Path(args.health_code_sample_dir) / "hsm.png"))
         break
 else:
     raise HealthCodeNotFound
-
-check_image_similarity(akm_path, args.akm_sample_path)
 
 print('Getting XCK')
 d.app_start('com.caict.xingchengka')
@@ -104,18 +109,20 @@ for _ in range(5):
     sleep(3)
     if d.xpath('%的动态行程卡').exists:
         d.screenshot(xck_path)
+        check_image_similarity(
+            xck_path, str(Path(args.health_code_sample_dir) / "xck.png"))
         break
 else:
     raise HealthCodeNotFound
 
-check_image_similarity(xck_path, args.xck_sample_path)
-
 print('Uploading the health codes')
-subprocess.run(['bash', 'upload.sh'],
-               env={
-                   'AKM_PATH': akm_path,
-                   'XCK_PATH': xck_path,
-               })
+subprocess.run(
+    ['bash', 'upload.sh'],
+    env={
+        'AKM_PATH': akm_path,
+        'XCK_PATH': xck_path,
+        'HSM_PATH': hsm_path if upload_hsm else ''
+    })
 
 d.app_start('com.termux')
 

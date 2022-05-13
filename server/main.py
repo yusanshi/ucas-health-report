@@ -10,6 +10,15 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
+from selenium.common.exceptions import NoSuchElementException
+
+try:
+    from notify import notify
+except ModuleNotFoundError:
+
+    def notify(message, attachment_path=None):
+        pass
+
 
 from config import CAS_USERNAME, CAS_PASSWORD
 
@@ -23,8 +32,14 @@ parser.add_argument('--health_code_dir',
                     default=str(Path.home() / "health-code"))
 args = parser.parse_args()
 
+Path(args.health_code_dir).mkdir(parents=True, exist_ok=True)
 akm_path = str(Path(args.health_code_dir) / f"{date.today()}-akm.png")
 xck_path = str(Path(args.health_code_dir) / f"{date.today()}-xck.png")
+hsm_path = str(Path(args.health_code_dir) / f"{date.today()}-hsm.png")
+screenshot_path = str(
+    Path(args.health_code_dir) / f"{date.today()}-screenshot.png")
+
+upload_hsm = Path(hsm_path).is_file()
 
 
 def main():
@@ -34,6 +49,7 @@ def main():
     options = Options()
     options.add_argument('--no-sandbox')
     options.add_argument('--headless')
+    options.add_argument('--window-size=1920,1080')
     options.add_argument('--disable-dev-shm-usage')
     options.add_argument('--disable-gpu')
     options.add_argument('--disable-extensions')
@@ -79,11 +95,27 @@ def main():
         sleep(2)
         assert '删除' in xck_form.text
 
-        akm_form = driver.find_element(By.XPATH,
-                                       "//h5[text()='上传安康码：']/parent::div")
-        akm_form.find_element(By.TAG_NAME, 'input').send_keys(akm_path)
-        sleep(2)
-        assert '删除' in akm_form.text
+        try:
+            akm_form = driver.find_element(
+                By.XPATH, "//h5[text()='上传安康码：']/parent::div")
+            akm_form.find_element(By.TAG_NAME, 'input').send_keys(akm_path)
+            sleep(2)
+            assert '删除' in akm_form.text
+        except NoSuchElementException:
+            pass
+
+        try:
+            if upload_hsm:
+                hsm_form = driver.find_element(
+                    By.XPATH, "//h5[text()='上传本周核酸检测报告：']/parent::div")
+                hsm_form.find_element(By.TAG_NAME, 'input').send_keys(hsm_path)
+                sleep(2)
+                assert '删除' in hsm_form.text
+        except NoSuchElementException:
+            pass
+
+        driver.find_element(By.ID,
+                            'upload-profile').screenshot(screenshot_path)
 
         driver.get(APPLY_URL)
         sleep(2)
@@ -122,12 +154,14 @@ if __name__ == '__main__':
     for i in range(5):
         try:
             main()
-            print('Success')
+            message = '[UCAS Health Report] Success'
+            if upload_hsm:
+                message += ' (with HSM)'
+            notify(message, screenshot_path)
             break
         except Exception as e:
             print(f'Failed for {i+1} times: {e}')
             errors.append(str(e))
             sleep(10 * (i + 1))
     else:
-        from notify import notify
-        notify('Failed: ' + str(list(enumerate(errors))))
+        notify('[UCAS Health Report] Failed: ' + str(list(enumerate(errors))))
