@@ -22,7 +22,7 @@ parser.add_argument('--health_code_sample_dir',
                     type=str,
                     default=str(Path.home() / "health-code-sample"),
                     help="示例健康码图片位置，用于计算相似度")
-parser.add_argument('--similiarity_threshold', type=float, default=0.9)
+parser.add_argument('--similiarity_threshold', type=float, default=0.8)
 args = parser.parse_args()
 
 Path(args.health_code_save_dir).mkdir(parents=True, exist_ok=True)
@@ -75,8 +75,7 @@ for _ in range(10):
         assert d(text='取消').exists
         d(text='取消').click()
         continue
-    if d(text='安康码').exists and d(text='我的卡包').exists and d(
-            text='办事大厅').exists:
+    if d(text='安康码').exists and d(text='我的卡包').exists:
         # at home page
         d(text='安康码').click()
         continue
@@ -115,16 +114,24 @@ for _ in range(5):
 else:
     raise HealthCodeNotFound
 
-print('Uploading the health codes')
-subprocess.run(
-    ['bash', 'upload.sh'],
-    env={
-        'AKM_PATH': akm_path,
-        'XCK_PATH': xck_path,
-        'HSM_PATH': hsm_path if upload_hsm else ''
-    })
-
 d.app_start('com.termux')
+
+print('Uploading the health codes')
+for _ in range(3):
+    try:
+        subprocess.run(
+            ['bash', 'upload.sh'],
+            check=True,
+            env={
+                'AKM_PATH': akm_path,
+                'XCK_PATH': xck_path,
+                'HSM_PATH': hsm_path if upload_hsm else ''
+            })
+        break
+    except subprocess.CalledProcessError:
+        pass
+else:
+    raise ValueError('Upload failed')
 
 
 class TimeoutExpired(Exception):
