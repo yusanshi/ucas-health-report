@@ -1,5 +1,6 @@
 import argparse
 import easyocr
+import random
 
 from pathlib import Path
 from time import sleep
@@ -138,8 +139,9 @@ def main():
 
         driver.find_element(By.XPATH, "//span[text()='先研院']").click()
         sleep(1)
-        driver.find_element(By.XPATH,
-                            "//input[@name='reason']").send_keys('科研、锻炼身体')
+        reasons = ['科研、锻炼身体', '跑步', '学习', '锻炼身体']
+        driver.find_element(By.XPATH, "//input[@name='reason']").send_keys(
+            random.choice(reasons))
         sleep(1)
         driver.find_element(By.XPATH, "//button[text()='提交报备']").click()
 
