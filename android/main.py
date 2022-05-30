@@ -85,7 +85,7 @@ for _ in range(10):
         d.send_keys(WST_PASSWORD)
         d.xpath('@com.iflytek.oshall.ahzwfw:id/login_btn').click()
         continue
-    if d(text='切换国康码').exists:
+    if d(text='切换敬老版').exists:
         d.screenshot(akm_path)
         check_image_similarity(
             akm_path, str(Path(args.health_code_sample_dir) / "akm.png"))
@@ -113,6 +113,10 @@ for _ in range(5):
         break
 else:
     raise HealthCodeNotFound
+
+# TODO a tricky solution for shutdown alarms not turning on
+d.app_start('com.android.deskclock')
+sleep(5)
 
 d.app_start('com.termux')
 
