@@ -90,7 +90,7 @@ for _ in range(10):
         check_image_similarity(
             akm_path, str(Path(args.health_code_sample_dir) / "akm.png"))
         if upload_hsm:
-            d(text='核酸检测报告').click()
+            d(text='核酸检测报告 ').click()
             sleep(5)
             d(text='阴性').click()
             sleep(5)
@@ -116,7 +116,16 @@ else:
 
 # TODO a tricky solution for shutdown alarms not turning on
 d.app_start('com.android.deskclock')
-sleep(5)
+sleep(4)
+alarm_switch_xpath = '@com.android.deskclock:id/onoff'
+assert len(d.xpath(alarm_switch_xpath).all()) == 1
+alarm_switch = d.xpath(alarm_switch_xpath)
+alarm_switch.click()
+sleep(2)
+alarm_switch.click()
+sleep(2)
+assert alarm_switch.text == 'ON'
+sleep(4)
 
 d.app_start('com.termux')
 
