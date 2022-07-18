@@ -12,6 +12,34 @@ from pathlib import Path
 from time import sleep
 from datetime import date
 
+
+class TimeoutExpired(Exception):
+    pass
+
+
+def input_with_timeout(timeout):
+    # https://stackoverflow.com/questions/15528939/time-limited-input
+    ready, _, _ = select.select([sys.stdin], [], [], timeout)
+    if ready:
+        return sys.stdin.readline().rstrip('\n')
+    raise TimeoutExpired
+
+
+def wait_for_enter_to_exit(timeout=5):
+    """
+    Wait for at most `timeout` seconds:
+    if user press Enter, exit, else, do nothing.
+    """
+    try:
+        input_with_timeout(timeout)
+        sys.exit()
+    except TimeoutExpired:
+        pass
+
+
+print('The script will be run in 5 seconds. Press Enter to cancel and exit:')
+wait_for_enter_to_exit()
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--health_code_dir',
                     type=str,
@@ -108,24 +136,8 @@ for _ in range(3):
 else:
     raise ValueError('Upload failed')
 
-
-class TimeoutExpired(Exception):
-    pass
-
-
-def input_with_timeout(timeout):
-    # https://stackoverflow.com/questions/15528939/time-limited-input
-    ready, _, _ = select.select([sys.stdin], [], [], timeout)
-    if ready:
-        return sys.stdin.readline().rstrip('\n')
-    raise TimeoutExpired
-
-
 print(
-    'Work done. The device will be shutdown in 10 seconds. Press any key to cancel shutdown: '
+    'Work done. The device will be shutdown in 5 seconds. Press Enter to cancel shutdown:'
 )
-try:
-    input_with_timeout(10)
-    print('Shutdown canceled')
-except TimeoutExpired:
-    subprocess.run('adb -s localhost:5555 shell reboot -p', shell=True)
+wait_for_enter_to_exit()
+subprocess.run('adb -s localhost:5555 shell reboot -p', shell=True)
