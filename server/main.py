@@ -34,18 +34,13 @@ parser.add_argument('--health_code_dir',
 args = parser.parse_args()
 
 Path(args.health_code_dir).mkdir(parents=True, exist_ok=True)
-akm_path = str(Path(args.health_code_dir) / f"{date.today()}-akm.png")
 xck_path = str(Path(args.health_code_dir) / f"{date.today()}-xck.png")
-hsm_path = str(Path(args.health_code_dir) / f"{date.today()}-hsm.png")
 screenshot_path = str(
     Path(args.health_code_dir) / f"{date.today()}-screenshot.png")
 
-upload_hsm = Path(hsm_path).is_file()
-
 
 def main():
-    assert Path(akm_path).is_file() and Path(
-        xck_path).is_file(), 'Health code of today not found.'
+    assert Path(xck_path).is_file(), 'Health code of today not found.'
 
     options = Options()
     options.add_argument('--no-sandbox')
@@ -96,25 +91,6 @@ def main():
         sleep(2)
         assert len(xck_form.find_elements(By.TAG_NAME, 'img')) > 0
 
-        try:
-            akm_form = driver.find_element(
-                By.XPATH, "//h5[text()='上传安康码：']/parent::div")
-            akm_form.find_element(By.TAG_NAME, 'input').send_keys(akm_path)
-            sleep(2)
-            assert len(akm_form.find_elements(By.TAG_NAME, 'img')) > 0
-        except NoSuchElementException:
-            pass
-
-        try:
-            if upload_hsm:
-                hsm_form = driver.find_element(
-                    By.XPATH, "//h5[text()='上传本周核酸检测报告：']/parent::div")
-                hsm_form.find_element(By.TAG_NAME, 'input').send_keys(hsm_path)
-                sleep(2)
-                assert len(hsm_form.find_elements(By.TAG_NAME, 'img')) > 0
-        except NoSuchElementException:
-            pass
-
         driver.find_element(By.ID,
                             'upload-profile').screenshot(screenshot_path)
 
@@ -157,13 +133,11 @@ if __name__ == '__main__':
         try:
             main()
             message = '[UCAS Health Report] Success'
-            if upload_hsm:
-                message += ' (with HSM)'
             notify(message, screenshot_path)
             break
         except Exception as e:
             print(f'Failed for {i+1} times: {e}')
             errors.append(str(e))
-            sleep(10 * (i + 1))
+            sleep(300 * (i + 1))
     else:
         notify('[UCAS Health Report] Failed: ' + str(list(enumerate(errors))))

@@ -26,11 +26,7 @@ parser.add_argument('--similiarity_threshold', type=float, default=0.8)
 args = parser.parse_args()
 
 Path(args.health_code_save_dir).mkdir(parents=True, exist_ok=True)
-akm_path = str(Path(args.health_code_save_dir) / f"{date.today()}-akm.png")
 xck_path = str(Path(args.health_code_save_dir) / f"{date.today()}-xck.png")
-hsm_path = str(Path(args.health_code_save_dir) / f"{date.today()}-hsm.png")
-
-upload_hsm = date.today().weekday() == 5  # Saturday
 
 
 def get_image_similiarity(first_image_path, second_image_path):
@@ -66,41 +62,6 @@ class HealthCodeNotFound(Exception):
 
 d = u2.connect('localhost:5555')
 
-print('Getting AKM')
-d.app_start('com.iflytek.oshall.ahzwfw')
-sleep(3)
-for _ in range(10):
-    sleep(3)
-    if d(text='打开系统定位服务').exists:
-        assert d(text='取消').exists
-        d(text='取消').click()
-        continue
-    if d(text='安康码').exists and d(text='我的卡包').exists:
-        # at home page
-        d(text='安康码').click()
-        continue
-    if d(text='请输入密码').exists:
-        # Need to relogin
-        d(text='请输入密码').click()
-        d.send_keys(WST_PASSWORD)
-        d.xpath('@com.iflytek.oshall.ahzwfw:id/login_btn').click()
-        continue
-    if d(text='切换敬老版').exists:
-        d.screenshot(akm_path)
-        check_image_similarity(
-            akm_path, str(Path(args.health_code_sample_dir) / "akm.png"))
-        if upload_hsm:
-            d(text='核酸检测报告 ').click()
-            sleep(5)
-            d(text='阴性').click()
-            sleep(5)
-            d.screenshot(hsm_path)
-            check_image_similarity(
-                hsm_path, str(Path(args.health_code_sample_dir) / "hsm.png"))
-        break
-else:
-    raise HealthCodeNotFound
-
 print('Getting XCK')
 d.app_start('com.caict.xingchengka')
 sleep(3)
@@ -132,14 +93,11 @@ d.app_start('com.termux')
 print('Uploading the health codes')
 for _ in range(3):
     try:
-        subprocess.run(
-            ['bash', 'upload.sh'],
-            check=True,
-            env={
-                'AKM_PATH': akm_path,
-                'XCK_PATH': xck_path,
-                'HSM_PATH': hsm_path if upload_hsm else ''
-            })
+        subprocess.run(['bash', 'upload.sh'],
+                       check=True,
+                       env={
+                           'XCK_PATH': xck_path,
+                       })
         break
     except subprocess.CalledProcessError:
         pass

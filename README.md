@@ -1,18 +1,18 @@
 # 国科大健康码上传和报备小工具
 
-用于国科大学生自动化上传健康码、申请出校报备。
+用于国科大学生自动化上传行程卡、申请出校报备。
 
 ## 简介
 
-本项目利用 root 后的安卓物理机获取健康码并上传到服务器端，利用服务器申请出校报备。安卓手机推荐安装类原生系统（本人用的是 [crDroid](https://crdroid.net/)，它包含安卓 11 和 12 的版本，本人选择的是 11）。
+本项目利用 root 后的安卓物理机获取行程卡并上传到服务器端，利用服务器申请出校报备。安卓手机推荐安装类原生系统（本人用的是 [crDroid](https://crdroid.net/)，它包含安卓 11 和 12 的版本，本人选择的是 11）。
 
 另有使用安卓虚拟机的方案，但是该方法无法正常使用通信行程卡 APP，所以每次需要手动输入验证码，见 [branch `virtual-android`](https://github.com/yusanshi/ucas-health-report/tree/virtual-android)。
 
-由于国科大提交出校报备时还要求当天已经健康打卡，所以请配合 [~~自动打卡工具~~ 开学报到提醒小工具](https://github.com/yusanshi/ucas-health-report) 使用。
+由于国科大提交出校报备时还要求当天已经健康打卡，所以请配合 [~~自动打卡工具~~ 开学报到提醒小工具](https://github.com/yusanshi/ucas-health-report) 使用。另记得在健康打卡页面授权系统自动获取京康码和核酸检测报告。
 
 ## 免责声明
 
-本脚本所获取的健康码全部来自于使用者个人当日的真实数据，不涉及到任何篡改健康码的行为，因此**原则上**是合规的。但为了避免一些“非原则”的事情发生，本项目作者作如下声明：
+本脚本所获取的行程卡来自于使用者个人当日的真实数据，不涉及到任何篡改行程卡的行为，因此**原则上**是合规的。但为了避免一些“非原则”的事情发生，本项目作者作如下声明：
 
 1. 仅用于中国科学院大学，其他高校（如中科大）学生请勿使用；
 2. 本脚本仅用于辅助使用者减少重复工作量，使用者需对本脚本所做的所有操作负责。
@@ -21,7 +21,7 @@
 
 ### 安卓端
 
-1. 安装京事通和通信行程卡 APP，（可选的推荐操作：利用 MagiskHide 之类的工具对它们隐藏 root），然后登录好两个 APP，确保可以正常获得健康码。
+1. 安装通信行程卡 APP，（可选的推荐操作：利用 MagiskHide 之类的工具对它隐藏 root），然后登录好 APP，确保可以正常获得行程卡。
 
 2. 安装 [Termux](https://github.com/termux/termux-app)，按 [[1]](https://wiki.termux.com/wiki/Remote_Access)、[[2]](https://joeprevite.com/ssh-termux-from-computer/) 配置好 SSH server，在电脑上 SSH 进入设备后运行以下命令：
 
@@ -42,8 +42,6 @@
    git clone https://github.com/yusanshi/ucas-health-report && cd ucas-health-report && git checkout physical-android
 
    cd android
-   cp config.sample.py config.py
-   vim config.py
    cp upload.sample.sh upload.sh
    vim upload.sh
 
