@@ -11,10 +11,9 @@ from PIL import Image
 from pathlib import Path
 from time import sleep
 from datetime import date
-from config import WST_PASSWORD
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--health_code_save_dir',
+parser.add_argument('--health_code_dir',
                     type=str,
                     default=str(Path.home() / "health-code"),
                     help="保存健康码图片的位置")
@@ -25,8 +24,9 @@ parser.add_argument('--health_code_sample_dir',
 parser.add_argument('--similiarity_threshold', type=float, default=0.8)
 args = parser.parse_args()
 
-Path(args.health_code_save_dir).mkdir(parents=True, exist_ok=True)
-xck_path = str(Path(args.health_code_save_dir) / f"{date.today()}-xck.png")
+Path(args.health_code_dir).mkdir(parents=True, exist_ok=True)
+xck_path = str(Path(args.health_code_dir) / f"{date.today()}-xck.png")
+note_path = str(Path(args.health_code_dir) / f"{date.today()}-note.txt")
 
 
 def get_image_similiarity(first_image_path, second_image_path):
@@ -88,6 +88,9 @@ sleep(2)
 assert alarm_switch.text == 'ON'
 sleep(4)
 
+with open(note_path, 'w') as f:
+    f.write(f"battery left: {d.device_info['battery']['level']}%")
+
 d.app_start('com.termux')
 
 print('Uploading the health codes')
@@ -97,6 +100,7 @@ for _ in range(3):
                        check=True,
                        env={
                            'XCK_PATH': xck_path,
+                           'NOTE_PATH': note_path,
                        })
         break
     except subprocess.CalledProcessError:

@@ -1,6 +1,7 @@
 import argparse
 import easyocr
 import random
+import sys
 
 from pathlib import Path
 from time import sleep
@@ -11,7 +12,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
-from selenium.common.exceptions import NoSuchElementException
 
 try:
     from notify import notify
@@ -35,13 +35,12 @@ args = parser.parse_args()
 
 Path(args.health_code_dir).mkdir(parents=True, exist_ok=True)
 xck_path = str(Path(args.health_code_dir) / f"{date.today()}-xck.png")
+note_path = str(Path(args.health_code_dir) / f"{date.today()}-note.txt")
 screenshot_path = str(
     Path(args.health_code_dir) / f"{date.today()}-screenshot.png")
 
 
 def main():
-    assert Path(xck_path).is_file(), 'Health code of today not found.'
-
     options = Options()
     options.add_argument('--no-sandbox')
     options.add_argument('--headless')
@@ -128,11 +127,21 @@ def main():
 
 
 if __name__ == '__main__':
+    if not Path(xck_path).is_file():
+        notify('[UCAS Health Report] Failed: health code of today not found.')
+        sys.exit()
+
     errors = []
     for i in range(5):
         try:
             main()
             message = '[UCAS Health Report] Success'
+            try:
+                with open(note_path) as f:
+                    note_text = f.read().strip()
+                    message += f', {note_text}'
+            except FileNotFoundError:
+                pass
             notify(message, screenshot_path)
             break
         except Exception as e:
