@@ -2,8 +2,8 @@
 Description=UCAS Daily Health Report Timer
 
 [Timer]
-OnCalendar=*-*-* 8:00
-RandomizedDelaySec=2h
+OnCalendar=*-*-* 7:00
+RandomizedDelaySec=1h
 Persistent=true
 
 [Install]

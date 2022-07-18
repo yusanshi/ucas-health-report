@@ -142,6 +142,7 @@ if __name__ == '__main__':
                     message += f', {note_text}'
             except FileNotFoundError:
                 pass
+            print(message)
             notify(message, screenshot_path)
             break
         except Exception as e:
