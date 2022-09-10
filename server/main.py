@@ -103,7 +103,7 @@ def main():
         sleep(1)
         driver.find_element(
             By.XPATH,
-            "//span[text()='我已知悉以上规定并保证按要求执行，做好个人防护，少出行不聚集。']").click()
+            "//span[text()='我已知悉学校防疫规定并保证按要求执行，做好个人防护，少出行不聚集。']").click()
         sleep(1)
         driver.find_element(By.XPATH, "//button[text()='进出校报备']").click()
 
