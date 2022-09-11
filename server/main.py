@@ -12,6 +12,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
+from selenium.common.exceptions import NoSuchElementException
 
 try:
     from notify import notify
@@ -34,6 +35,7 @@ parser.add_argument('--health_code_dir',
 args = parser.parse_args()
 
 Path(args.health_code_dir).mkdir(parents=True, exist_ok=True)
+akm_path = str(Path(args.health_code_dir) / f"{date.today()}-akm.png")
 xck_path = str(Path(args.health_code_dir) / f"{date.today()}-xck.png")
 note_path = str(Path(args.health_code_dir) / f"{date.today()}-note.txt")
 screenshot_path = str(
@@ -89,6 +91,15 @@ def main():
         xck_form.find_element(By.TAG_NAME, 'input').send_keys(xck_path)
         sleep(2)
         assert len(xck_form.find_elements(By.TAG_NAME, 'img')) > 0
+
+        try:
+            akm_form = driver.find_element(
+                By.XPATH, "//h5[text()='上传安康码：']/parent::div")
+            akm_form.find_element(By.TAG_NAME, 'input').send_keys(akm_path)
+            sleep(2)
+            assert len(akm_form.find_elements(By.TAG_NAME, 'img')) > 0
+        except Exception:
+            pass
 
         driver.find_element(By.ID,
                             'upload-profile').screenshot(screenshot_path)
