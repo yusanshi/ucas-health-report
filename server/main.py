@@ -84,10 +84,10 @@ def main():
         sleep(2)
         WebDriverWait(driver, 20).until(
             EC.presence_of_element_located(
-                (By.XPATH, "//h5[text()='选择7天大数据行程卡：']")))
+                (By.XPATH, "//h5[text()='上传7天大数据行程卡：']")))
 
         xck_form = driver.find_element(
-            By.XPATH, "//h5[text()='选择7天大数据行程卡：']/parent::div")
+            By.XPATH, "//h5[text()='上传7天大数据行程卡：']/parent::div")
         xck_form.find_element(By.TAG_NAME, 'input').send_keys(xck_path)
         sleep(2)
         assert len(xck_form.find_elements(By.TAG_NAME, 'img')) > 0

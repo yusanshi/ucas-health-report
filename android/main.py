@@ -105,9 +105,10 @@ try:
             assert d(text='取消').exists
             d(text='取消').click()
             continue
-        if d(text='安康码').exists and d(text='我的卡包').exists:
+        if d.xpath('@com.iflytek.oshall.ahzwfw:id/service_txt').exists and d(
+                text='我的卡包').exists:
             # at home page
-            d(text='安康码').click()
+            d.xpath('@com.iflytek.oshall.ahzwfw:id/service_txt').click()
             continue
         if d(text='请输入密码').exists:
             # Need to relogin
