@@ -59,6 +59,7 @@ args = parser.parse_args()
 Path(args.health_code_dir).mkdir(parents=True, exist_ok=True)
 akm_path = str(Path(args.health_code_dir) / f"{date.today()}-akm.png")
 xck_path = str(Path(args.health_code_dir) / f"{date.today()}-xck.png")
+hsm_path = str(Path(args.health_code_dir) / f"{date.today()}-hsm.png")
 note_path = str(Path(args.health_code_dir) / f"{date.today()}-note.txt")
 
 
@@ -95,36 +96,44 @@ class HealthCodeNotFound(Exception):
 
 d = u2.connect('localhost:5555')
 
-try:
-    print('Getting AKM')
-    d.app_start('com.iflytek.oshall.ahzwfw')
+print('Getting AKM')
+d.app_start('com.iflytek.oshall.ahzwfw')
+sleep(3)
+for _ in range(10):
     sleep(3)
-    for _ in range(10):
-        sleep(3)
-        if d(text='打开系统定位服务').exists:
-            assert d(text='取消').exists
-            d(text='取消').click()
-            continue
-        if d.xpath('@com.iflytek.oshall.ahzwfw:id/service_txt').exists and d(
-                text='我的卡包').exists:
-            # at home page
-            d.xpath('@com.iflytek.oshall.ahzwfw:id/service_txt').click()
-            continue
-        if d(text='请输入密码').exists:
-            # Need to relogin
-            d(text='请输入密码').click()
-            d.send_keys(WST_PASSWORD)
-            d.xpath('@com.iflytek.oshall.ahzwfw:id/login_btn').click()
-            continue
-        if d(text='切换敬老版').exists:
-            d.screenshot(akm_path)
-            check_image_similarity(
-                akm_path, str(Path(args.health_code_sample_dir) / "akm.png"))
-            break
-    else:
-        raise HealthCodeNotFound
-except Exception:
-    pass
+    if d(text='打开系统定位服务').exists:
+        assert d(text='取消').exists
+        d(text='取消').click()
+        continue
+    if d.xpath('@com.iflytek.oshall.ahzwfw:id/service_txt').exists and d(
+            text='我的卡包').exists:
+        # at home page
+        d.xpath('@com.iflytek.oshall.ahzwfw:id/service_txt').click()
+        continue
+    if d(text='请输入密码').exists:
+        # Need to relogin
+        d(text='请输入密码').click()
+        d.send_keys(WST_PASSWORD)
+        d.xpath('@com.iflytek.oshall.ahzwfw:id/login_btn').click()
+        continue
+    if d(text='切换敬老版').exists:
+        d.screenshot(akm_path)
+        check_image_similarity(
+            akm_path, str(Path(args.health_code_sample_dir) / "akm.png"))
+
+        d(text='核酸检测报告 ').click()
+        sleep(5)
+        if d(text='温馨提示').exists:
+            d(text='我知道了').click()
+            sleep(2)
+
+        d.screenshot(hsm_path)
+        check_image_similarity(
+            hsm_path, str(Path(args.health_code_sample_dir) / "hsm.png"))
+
+        break
+else:
+    raise HealthCodeNotFound
 
 print('Getting XCK')
 d.app_start('com.caict.xingchengka')
@@ -164,8 +173,9 @@ for _ in range(3):
             ['bash', 'upload.sh'],
             check=True,
             env={
-                'AKM_PATH': akm_path if Path(akm_path).is_file() else '',
+                'AKM_PATH': akm_path,
                 'XCK_PATH': xck_path,
+                'HSM_PATH': hsm_path,
                 'NOTE_PATH': note_path,
             })
         break

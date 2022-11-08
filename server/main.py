@@ -12,7 +12,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
-from selenium.common.exceptions import NoSuchElementException
 
 try:
     from notify import notify
@@ -37,6 +36,7 @@ args = parser.parse_args()
 Path(args.health_code_dir).mkdir(parents=True, exist_ok=True)
 akm_path = str(Path(args.health_code_dir) / f"{date.today()}-akm.png")
 xck_path = str(Path(args.health_code_dir) / f"{date.today()}-xck.png")
+hsm_path = str(Path(args.health_code_dir) / f"{date.today()}-hsm.png")
 note_path = str(Path(args.health_code_dir) / f"{date.today()}-note.txt")
 screenshot_path = str(
     Path(args.health_code_dir) / f"{date.today()}-screenshot.png")
@@ -100,6 +100,19 @@ def main():
             assert len(akm_form.find_elements(By.TAG_NAME, 'img')) > 0
         except Exception:
             pass
+
+        for text in [
+                '上传近7日核酸检测报告(如须上传多张，至少有一张在48h内)：',
+                '上传近7日第二张核酸检测报告(如须上传多张，至少有一张在48h内)：'
+        ]:
+            try:
+                hsm_form = driver.find_element(
+                    By.XPATH, f"//h5[text()='{text}']/parent::div")
+                hsm_form.find_element(By.TAG_NAME, 'input').send_keys(hsm_path)
+                sleep(2)
+                assert len(hsm_form.find_elements(By.TAG_NAME, 'img')) > 0
+            except Exception:
+                pass
 
         driver.find_element(By.ID,
                             'upload-profile').screenshot(screenshot_path)
