@@ -142,6 +142,16 @@ def main():
         driver.find_element(By.XPATH, "//input[@name='reason']").send_keys(
             random.choice(reasons))
         sleep(1)
+
+        try:
+            hsm_form = driver.find_element(
+                By.XPATH, "//h5[text()='未检测到昨日核酸检测结果，请自行上传：']/parent::div")
+            hsm_form.find_element(By.TAG_NAME, 'input').send_keys(hsm_path)
+            sleep(2)
+            assert len(hsm_form.find_elements(By.TAG_NAME, 'img')) > 0
+        except Exception:
+            pass
+
         driver.find_element(By.XPATH, "//button[text()='提交报备']").click()
 
         sleep(2)
