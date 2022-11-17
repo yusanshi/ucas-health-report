@@ -154,10 +154,9 @@ def main():
 
         driver.find_element(By.XPATH, "//button[text()='提交报备']").click()
 
-        sleep(2)
         WebDriverWait(driver, 20).until(
             EC.presence_of_element_located(
-                (By.XPATH, "//strong[text()='在校可跨校区']")))
+                (By.XPATH, "//p[contains(text(),'报备成功，门禁权限将在稍后生效')]")))
 
 
 if __name__ == '__main__':
