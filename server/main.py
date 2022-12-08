@@ -8,7 +8,7 @@ from time import sleep
 from datetime import date
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
@@ -24,22 +24,7 @@ except ModuleNotFoundError:
 from config import CAS_USERNAME, CAS_PASSWORD
 
 LOGIN_URL = 'https://passport.ustc.edu.cn/login?service=https%3A%2F%2Fweixine.ustc.edu.cn%2F2020%2Fcaslogin'
-UPLOAD_URL = 'https://weixine.ustc.edu.cn/2020/upload/xcm'
 APPLY_URL = 'https://weixine.ustc.edu.cn/2020/apply/daliy'
-
-parser = argparse.ArgumentParser()
-parser.add_argument('--health_code_dir',
-                    type=str,
-                    default=str(Path.home() / "health-code"))
-args = parser.parse_args()
-
-Path(args.health_code_dir).mkdir(parents=True, exist_ok=True)
-akm_path = str(Path(args.health_code_dir) / f"{date.today()}-akm.png")
-xck_path = str(Path(args.health_code_dir) / f"{date.today()}-xck.png")
-hsm_path = str(Path(args.health_code_dir) / f"{date.today()}-hsm.png")
-note_path = str(Path(args.health_code_dir) / f"{date.today()}-note.txt")
-screenshot_path = str(
-    Path(args.health_code_dir) / f"{date.today()}-screenshot.png")
 
 
 def main():
@@ -80,43 +65,6 @@ def main():
         WebDriverWait(driver, 20).until(
             EC.presence_of_element_located((By.XPATH, "//a[text()='退出']")))
 
-        driver.get(UPLOAD_URL)
-        sleep(2)
-        WebDriverWait(driver, 20).until(
-            EC.presence_of_element_located(
-                (By.XPATH, "//h5[text()='上传7天大数据行程卡：']")))
-
-        xck_form = driver.find_element(
-            By.XPATH, "//h5[text()='上传7天大数据行程卡：']/parent::div")
-        xck_form.find_element(By.TAG_NAME, 'input').send_keys(xck_path)
-        sleep(2)
-        assert len(xck_form.find_elements(By.TAG_NAME, 'img')) > 0
-
-        try:
-            akm_form = driver.find_element(
-                By.XPATH, "//h5[text()='上传安康码：']/parent::div")
-            akm_form.find_element(By.TAG_NAME, 'input').send_keys(akm_path)
-            sleep(2)
-            assert len(akm_form.find_elements(By.TAG_NAME, 'img')) > 0
-        except Exception:
-            pass
-
-        for text in [
-                '上传近7日核酸检测报告(如须上传多张，至少有一张在48h内)：',
-                '上传近7日第二张核酸检测报告(如须上传多张，至少有一张在48h内)：'
-        ]:
-            try:
-                hsm_form = driver.find_element(
-                    By.XPATH, f"//h5[text()='{text}']/parent::div")
-                hsm_form.find_element(By.TAG_NAME, 'input').send_keys(hsm_path)
-                sleep(2)
-                assert len(hsm_form.find_elements(By.TAG_NAME, 'img')) > 0
-            except Exception:
-                pass
-
-        driver.find_element(By.ID,
-                            'upload-profile').screenshot(screenshot_path)
-
         driver.get(APPLY_URL)
         sleep(2)
         WebDriverWait(driver, 20).until(
@@ -137,21 +85,13 @@ def main():
                 (By.XPATH, "//button[text()='提交报备']")))
 
         driver.find_element(By.XPATH, "//span[text()='先研院']").click()
-        sleep(1)
-        reasons = ['科研、锻炼身体', '跑步', '学习', '锻炼身体']
-        driver.find_element(By.XPATH, "//input[@name='reason']").send_keys(
-            random.choice(reasons))
-        sleep(1)
 
-        try:
-            hsm_form = driver.find_element(
-                By.XPATH, "//h5[text()='未检测到昨日核酸检测结果，请自行上传：']/parent::div")
-            hsm_form.find_element(By.TAG_NAME, 'input').send_keys(hsm_path)
-            sleep(2)
-            assert len(hsm_form.find_elements(By.TAG_NAME, 'img')) > 0
-        except Exception:
-            pass
+        sleep(1)
+        Select(driver.find_element(By.ID, "reason")).select_by_value('其它事宜')
+        reasons = ['科研、锻炼身体', '跑步', '锻炼身体']
+        driver.find_element(By.ID, "comment").send_keys(random.choice(reasons))
 
+        sleep(1)
         driver.find_element(By.XPATH, "//button[text()='提交报备']").click()
 
         WebDriverWait(driver, 20).until(
@@ -160,23 +100,13 @@ def main():
 
 
 if __name__ == '__main__':
-    if not Path(xck_path).is_file():
-        notify('[UCAS Health Report] Failed: health code of today not found.')
-        sys.exit()
-
     errors = []
     for i in range(5):
         try:
             main()
             message = '[UCAS Health Report] Success'
-            try:
-                with open(note_path) as f:
-                    note_text = f.read().strip()
-                    message += f', {note_text}'
-            except FileNotFoundError:
-                pass
             print(message)
-            notify(message, screenshot_path)
+            notify(message)
             break
         except Exception as e:
             print(f'Failed for {i+1} times: {e}')
