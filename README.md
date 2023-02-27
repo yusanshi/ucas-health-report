@@ -8,7 +8,7 @@
 
 另有使用安卓虚拟机的方案，但是该方法无法正常使用通信行程卡 APP，所以每次需要手动输入验证码，见 [branch `virtual-android`](https://github.com/yusanshi/ucas-health-report/tree/virtual-android)。
 
-由于国科大提交出校报备时还要求当天已经健康打卡，所以请配合 [~~自动打卡工具~~ 开学报到提醒小工具](https://github.com/yusanshi/ucas-health-report) 使用。
+由于国科大提交出校报备时还要求当天已经健康打卡，所以请配合 [~~自动打卡工具~~ 开学报到提醒小工具](https://github.com/yusanshi/ucas-checkin) 使用。
 
 ## 免责声明
 
